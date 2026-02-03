@@ -1,12 +1,11 @@
-# Usa el SDK de .NET para compilar
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copia los archivos y restaura dependencias
+# Copiar archivos del proyecto y restaurar
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copia todo lo demás y publica
+# Copiar todo y publicar
 COPY . ./
 RUN dotnet publish -c Release -o out
 
@@ -15,7 +14,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
 
-# Configura el puerto para Render
 ENV ASPNETCORE_URLS=http://+:10000
 EXPOSE 10000
 
