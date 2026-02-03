@@ -1,39 +1,29 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configurar el puerto dinámico para Render
+// 1. Configurar el puerto dinámico para Render (Crítico)
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 builder.WebHost.UseUrls($"http://*:{port}");
 
+// 2. Servicios básicos
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); // Opcional: Re-activado para probar la API
 
-// 2. Configurar CORS para producción
+// 3. Configurar CORS (Para que tu React pueda conectar)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact",
-        policy => policy.AllowAnyOrigin() // En Render, esto facilita la conexión inicial
+        policy => policy.AllowAnyOrigin() 
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
 
 var app = builder.Build();
 
-// 3. ¡IMPORTANTE! Mover MapControllers fuera del bloque de Development
-// Si se queda adentro, tu API no responderá nada en Render (Producción)
+// 4. Mapeo de rutas (Fuera de cualquier IF para que funcione en Render)
 app.MapControllers(); 
-
 app.UseCors("AllowReact");
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-// Comentamos Redirection porque Docker/Render manejan HTTP internamente
-// app.UseHttpsRedirection();
-
+// 5. Ruta de prueba WeatherForecast
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -50,13 +40,12 @@ app.MapGet("/weatherforecast", () =>
         ))
         .ToArray();
     return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+});
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+// El record debe ir al final o fuera del flujo principal
+public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
