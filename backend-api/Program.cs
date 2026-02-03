@@ -1,36 +1,38 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// 1. Configurar el puerto dinámico para Render
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(); // Opcional: Re-activado para probar la API
 
+// 2. Configurar CORS para producción
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact",
-        policy => policy.WithOrigins("http://localhost:3000")
+        policy => policy.AllowAnyOrigin() // En Render, esto facilita la conexión inicial
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
 
-
 var app = builder.Build();
+
+// 3. ¡IMPORTANTE! Mover MapControllers fuera del bloque de Development
+// Si se queda adentro, tu API no responderá nada en Render (Producción)
+app.MapControllers(); 
 
 app.UseCors("AllowReact");
 
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
-
-
-    app.MapControllers(); // IMPORTANTE
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+// Comentamos Redirection porque Docker/Render manejan HTTP internamente
+// app.UseHttpsRedirection();
 
 var summaries = new[]
 {
@@ -39,7 +41,7 @@ var summaries = new[]
 
 app.MapGet("/weatherforecast", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
+    var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
