@@ -1,4 +1,12 @@
-const BASE_URL = "http://localhost:5090/api/servicios";
+const BASE_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api/servicios` 
+  : "http://localhost:5090/api/servicios";
+
+export async function getServicios() {
+  const res = await fetch(BASE_URL);
+  if (!res.ok) throw new Error("Error al cargar servicios");
+  return res.json();
+}
 
 export async function getServicios() {
   const res = await fetch(BASE_URL);
