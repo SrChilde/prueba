@@ -1,11 +1,19 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. Configurar el puerto dinámico para Render (OBLIGATORIO)
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 builder.WebHost.UseUrls($"http://*:{port}");
 
-builder.Services.AddControllers();
+// 2. Agregar servicios al contenedor
+builder.Services.AddControllers(); // Esto permite que el backend encuentre ServiciosController
 builder.Services.AddEndpointsApiExplorer();
 
+// 3. Configurar CORS (Permisos para que el Frontend entre)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact",
@@ -16,11 +24,14 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// ORDEN CRÍTICO
+// 4. ORDEN CRÍTICO DE MIDDLEWARES
+// El CORS debe ir SIEMPRE antes de los Controladores
 app.UseCors("AllowReact"); 
-app.MapControllers();
 
-app.MapGet("/", () => "Backend funcionando correctamente"); // Ruta raíz para probar fácil
+app.MapControllers(); // Esto activa tus rutas de api/servicios
+
+// 5. Rutas de prueba para verificar salud del servidor
+app.MapGet("/", () => "Backend funcionando correctamente. Usa /api/servicios para los datos.");
 
 app.MapGet("/weatherforecast", () =>
 {
@@ -38,6 +49,7 @@ app.MapGet("/weatherforecast", () =>
 
 app.Run();
 
+// Definición para la ruta de prueba
 public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
