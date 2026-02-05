@@ -1,4 +1,4 @@
-// Prueba forzando la URL real para descartar errores de variables
+
 const BASE_URL = "https://serviciosti.onrender.com/api/servicios";
 
 export async function getServicios() {
@@ -19,7 +19,6 @@ export async function getServicios() {
   }
 }
 
-// ... mantén tus otras funciones (crear, actualizar) usando la misma BASE_URL
 
 export async function crearServicio(payload) {
   const res = await fetch(BASE_URL, {

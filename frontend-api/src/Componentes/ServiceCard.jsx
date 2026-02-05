@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function ServiceCard({ servicio, onEdit }) {
   return (
     <div style={{
@@ -21,8 +23,50 @@ function ServiceCard({ servicio, onEdit }) {
     }}
     >
       <h3 style={{ color: 'var(--primary-blue)', marginTop: 0 }}>{servicio.nombre}</h3>
-      <p style={{ color: 'var(--dark-gray)', marginBottom: 0 }}>{servicio.descripcion}</p>
-      <button onClick={() => onEdit(servicio)}>Editar</button>
+      <p style={{ color: 'var(--dark-gray)', marginBottom: '15px' }}>{servicio.descripcion}</p>
+      
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <Link to={`/servicios/${servicio.id}`} style={{
+          color: 'var(--primary-blue)',
+          textDecoration: 'none',
+          fontWeight: '500',
+          transition: 'color 0.3s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = 'var(--primary-blue-dark)';
+          e.currentTarget.style.textDecoration = 'underline';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = 'var(--primary-blue)';
+          e.currentTarget.style.textDecoration = 'none';
+        }}
+        >
+          Ver detalle
+        </Link>
+
+        {onEdit && (
+          <button onClick={() => onEdit(servicio)} style={{
+            marginLeft: '10px',
+            backgroundColor: 'var(--primary-blue)',
+            color: 'var(--white)',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '8px 16px',
+            cursor: 'pointer',
+            fontWeight: '500',
+            transition: 'background-color 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--primary-blue-dark)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--primary-blue)';
+          }}
+          >
+            Editar
+          </button>
+        )}
+      </div>
     </div>
   );
 }
